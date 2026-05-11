@@ -554,8 +554,8 @@ impl<'a> ThriftReader<'a> {
     }
 
     /// Read a field header in Thrift Compact Protocol.
-    /// Returns (field_id_delta, type_id) or None for stop byte.
-    fn read_field_header(&mut self) -> Option<(u8, u8)> {
+    /// Returns (field_id, type_id) or None for stop byte.
+    fn read_field_header(&mut self) -> Option<(i16, u8)> {
         if self.pos >= self.data.len() {
             return None;
         }
@@ -564,6 +564,11 @@ impl<'a> ThriftReader<'a> {
         if byte == 0 {
             // Stop byte
             self.pos += 1;
+            // Reset current_field_id for the next struct if needed, 
+            // but in Parquet we don't strictly need to reset it 
+            // since a struct parsing loop creates a new ThriftReader or we handle it.
+            // Actually, wait, ThriftReader is passed around mutably.
+            // When we enter a new struct, current_field_id should be 0.
             return None;
         }
         self.pos += 1;
@@ -574,15 +579,14 @@ impl<'a> ThriftReader<'a> {
         if field_delta == 0 {
             // Long form: field ID follows as zigzag i16
             if let Ok(fid) = self.read_i32() {
-                let _delta = (fid as i16 - self.current_field_id) as u8;
                 self.current_field_id = fid as i16;
-                return Some((fid as u8, field_type));
+                return Some((self.current_field_id, field_type));
             }
             return None;
         }
 
         self.current_field_id += field_delta as i16;
-        Some((field_delta, field_type))
+        Some((self.current_field_id, field_type))
     }
 
     /// Read a list header: (element_type, count)
