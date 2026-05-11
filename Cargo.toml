@@ -7,7 +7,9 @@ description = "A lightweight, pure-Rust alternative to the official Apache Parqu
 license = "Apache-2.0"
 keywords = ["parquet", "arrow", "wasm", "lightweight"]
 categories = ["encoding", "parser-implementations"]
-
+repository = "https://github.com/iamfaiz123/parquet-lite"
+homepage = "https://github.com/iamfaiz123/parquet-lite"
+documentation = "https://docs.rs/parquet-lite"
 [dependencies]
 bytes = "1.5"
 thiserror = "1.0"
