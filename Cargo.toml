@@ -1,0 +1,47 @@
+[package]
+name = "parquet-lite"
+version = "0.2.0"
+edition = "2021"
+authors = ["Faizal Khan"]
+description = "A lightweight, pure-Rust alternative to the official Apache Parquet crate — minimal dependencies, small binary size, WASM-compatible"
+license = "Apache-2.0"
+keywords = ["parquet", "arrow", "wasm", "lightweight"]
+categories = ["encoding", "parser-implementations"]
+
+[dependencies]
+bytes = "1.5"
+thiserror = "1.0"
+arrow-array = { version = "50", default-features = false }
+arrow-schema = { version = "50", default-features = false }
+arrow-buffer = { version = "50", default-features = false }
+snap = { version = "1.1", optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_json = { version = "1.0", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+
+[dev-dependencies]
+criterion = "0.5"
+
+[features]
+default = ["snappy"]
+snappy = ["snap"]
+serde = ["dep:serde", "dep:serde_json"]
+wasm = ["wasm-bindgen", "serde"]
+full = ["snappy", "serde", "wasm"]
+
+[[bench]]
+name = "read_performance"
+harness = false
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.bench]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+
